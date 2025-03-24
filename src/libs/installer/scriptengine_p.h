@@ -141,6 +141,9 @@ public slots:
     void rejectWithoutPrompt();
     void showFinishedPage();
     void setModified(bool value);
+    // New functions to get and set stylesheets
+    QString getPageStyleSheet(const QString &pageObjectName) const;
+    void setPageStyleSheet(const QString &pageObjectName, const QString &styleSheet);
 
 private:
     ScriptEngine *m_engine;
