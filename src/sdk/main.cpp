@@ -103,6 +103,9 @@ static void cleanupUpdate(const CommandLineParser &parser, bool *exit)
 
 int main(int argc, char *argv[])
 {
+#if defined(Q_OS_WIN)
+	qputenv("QT_QPA_PLATFORM", "windows:darkmode=0");
+#endif
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     if (!qEnvironmentVariableIsSet("QT_AUTO_SCREEN_SCALE_FACTOR")
             && !qEnvironmentVariableIsSet("QT_SCALE_FACTOR")
