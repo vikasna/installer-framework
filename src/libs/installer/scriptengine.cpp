@@ -275,6 +275,28 @@ void GuiProxy::setModified(bool value)
         m_gui->setModified(value);
 }
 
+QString GuiProxy::getPageStyleSheet(const QString &pageObjectName) const
+{
+    if (!m_gui)
+        return QString();
+
+    QWidget *page = m_gui->pageByObjectName(pageObjectName);
+    if (!page)
+        return QString();
+
+    return page->styleSheet();
+}
+
+void GuiProxy::setPageStyleSheet(const QString &pageObjectName, const QString &styleSheet)
+{
+    if (!m_gui)
+        return;
+
+    QWidget *page = m_gui->pageByObjectName(pageObjectName);
+    if (page)
+        page->setStyleSheet(styleSheet);
+}
+
 QFileDialogProxy::QFileDialogProxy(PackageManagerCore *core): m_core(core)
 {
 }
@@ -367,6 +389,18 @@ ScriptEngine::ScriptEngine(PackageManagerCore *core) : QObject(core)
 #ifdef Q_OS_WIN
     global.setProperty(QLatin1String("QSettings"), generateSettingsObject());
 #endif
+
+    // Load and evaluate utils.js
+    QFile file(QStringLiteral(":/scripts/utils.js"));
+    if (file.open(QIODevice::ReadOnly)) {
+        QString scriptContent = QString::fromUtf8(file.readAll());
+        QJSValue result = m_engine.evaluate(scriptContent, QStringLiteral("qrc:/scripts/utils.js"));
+        if (result.isError()) {
+            qWarning() << "Error evaluating utils.js:" << result.toString();
+        }
+    } else {
+        qWarning() << "Could not open utils.js";
+    }
 
     if (core) {
         setGuiQObject(core->guiObject());
