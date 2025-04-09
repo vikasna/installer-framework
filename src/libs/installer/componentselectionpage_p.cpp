@@ -117,7 +117,7 @@ ComponentSelectionPagePrivate::ComponentSelectionPagePrivate(ComponentSelectionP
     m_sizeLabel = new QLabel(m_descriptionBaseWidget);
     m_sizeLabel->setWordWrap(true);
     m_sizeLabel->setObjectName(QLatin1String("ComponentSizeLabel"));
-    descriptionVLayout->addWidget(m_sizeLabel);
+    // descriptionVLayout->addWidget(m_sizeLabel); // Vikas, we dont need this
 
     m_createOfflinePushButton = new QPushButton(q);
     m_createOfflinePushButton->setVisible(false);
@@ -180,6 +180,7 @@ ComponentSelectionPagePrivate::ComponentSelectionPagePrivate(ComponentSelectionP
     m_checkStateComboBox->insertItem(scUncheckAllIndex, ComponentSelectionPage::tr("Deselect All"));
     m_checkStateComboBox->setItemData(scUncheckAllIndex,
         ComponentSelectionPage::tr("Deselect all components in the tree view."), Qt::ToolTipRole);
+    m_checkStateComboBox->hide(); // Vikas, calling hide as it was visible even when topHLayout was not added to mainGLayout
 
     QWidget *progressStackedWidget = new QWidget();
     QVBoxLayout *metaLayout = new QVBoxLayout(progressStackedWidget);
@@ -199,6 +200,7 @@ ComponentSelectionPagePrivate::ComponentSelectionPagePrivate(ComponentSelectionP
     connect(m_searchLineEdit, &QLineEdit::textChanged,
             this, &ComponentSelectionPagePrivate::setSearchPattern);
     connect(q, &ComponentSelectionPage::entered, m_searchLineEdit, &QLineEdit::clear);
+    m_searchLineEdit->hide(); // Vikas, calling hide as it was visible even when topHLayout was not added to mainGLayout
     topHLayout->addWidget(m_searchLineEdit);
 
     QVBoxLayout *treeViewVLayout = new QVBoxLayout;
@@ -214,7 +216,7 @@ ComponentSelectionPagePrivate::ComponentSelectionPagePrivate(ComponentSelectionP
         m_mainGLayout->getContentsMargins(&left, &top, nullptr, &bottom);
         m_mainGLayout->setContentsMargins(left, top, 0, bottom);
     }
-    m_mainGLayout->addLayout(topHLayout, 0, 0);
+    //m_mainGLayout->addLayout(topHLayout, 0, 0); // Vikas, not adding this as we dont need the search and menu
     m_mainGLayout->addLayout(treeViewVLayout, 1, 0);
     m_mainGLayout->addLayout(m_rightSideVLayout, 0, 1, 0, -1);
     m_mainGLayout->setColumnStretch(0, 3);
