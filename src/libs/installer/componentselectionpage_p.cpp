@@ -202,7 +202,8 @@ ComponentSelectionPagePrivate::ComponentSelectionPagePrivate(ComponentSelectionP
     connect(m_searchLineEdit, &QLineEdit::textChanged,
             this, &ComponentSelectionPagePrivate::setSearchPattern);
     connect(q, &ComponentSelectionPage::entered, m_searchLineEdit, &QLineEdit::clear);
-    m_topHLayout->addWidget(m_searchLineEdit);
+    m_searchLineEdit->hide(); // Vikas, calling hide as it was visible even when topHLayout was not added to mainGLayout
+    topHLayout->addWidget(m_searchLineEdit);
 
     QVBoxLayout *treeViewVLayout = new QVBoxLayout;
     treeViewVLayout->setObjectName(QLatin1String("TreeviewLayout"));
@@ -217,6 +218,7 @@ ComponentSelectionPagePrivate::ComponentSelectionPagePrivate(ComponentSelectionP
     m_mainGLayout->addLayout(m_topHLayout, 0, 0);
     m_mainGLayout->addLayout(treeViewVLayout, 1, 0);
     m_mainGLayout->addLayout(m_rightSideVLayout, 0, 1, 0, -1);
+    //m_mainGLayout->addLayout(topHLayout, 0, 0); // Vikas, not adding this as we dont need the search and menu
 
     int detailsViewWidth = std::max(m_core->settings().wizardDefaultWidth()/4, 100);
     m_mainGLayout->setColumnMinimumWidth(1, detailsViewWidth);
