@@ -117,6 +117,7 @@ ComponentSelectionPagePrivate::ComponentSelectionPagePrivate(ComponentSelectionP
     m_sizeLabel = new QLabel(m_descriptionBaseWidget);
     m_sizeLabel->setWordWrap(true);
     m_sizeLabel->setObjectName(QLatin1String("ComponentSizeLabel"));
+    m_sizeLabel->hide(); // Vikas, calling hide as it was visible even when its not added to descriptionVLayout
     // descriptionVLayout->addWidget(m_sizeLabel); // Vikas, we dont need this
 
     m_createOfflinePushButton = new QPushButton(q);
