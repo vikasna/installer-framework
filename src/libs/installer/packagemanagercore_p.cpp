@@ -1673,7 +1673,7 @@ void PackageManagerCorePrivate::writeMaintenanceTool(OperationList performedOper
             QInstaller::appendInt64(&file, BinaryContent::MagicCookie);
         }
         input.close();
-        if (m_core->isInstaller())
+        if (m_core->isInstaller() || isUpdater() || isPackageManager())
             registerMaintenanceTool();
 #ifdef Q_OS_MACOS
         if (newBinaryWritten) {
@@ -2814,8 +2814,37 @@ void PackageManagerCorePrivate::registerMaintenanceTool()
         return QString::fromLatin1("\"%1\"").arg(s);
     };
 
+    // Get product name first
+    const QString productName = m_data.value(QLatin1String("ProductName")).toString();
+
+    // Get list of installed components and join their names with commas
+    QStringList installedComponents;
+    foreach (QInstaller::Component *component, m_core->components(PackageManagerCore::ComponentType::All)) {
+        if (component->isInstalled()) {
+            const QString componentDisplayName = component->displayName();
+            // Skip if component name matches product name
+            if (componentDisplayName != productName) {
+                installedComponents.append(componentDisplayName);
+            }
+        }
+    }
+    
+    // Create the full display name
+    QString displayName(productName);
+    if (!installedComponents.isEmpty()) {
+        const QString componentList = installedComponents.join(QLatin1String(", "));
+        // Check length and truncate if needed
+        if (componentList.length() > 197) { // 197 to account for " (...)" format
+            displayName += QString(QLatin1String(" (%1...)"))
+            .arg(componentList.left(194));
+        } else {
+            displayName += QString(QLatin1String(" (%1)"))
+                .arg(componentList);
+        }
+    }
+
     QSettingsWrapper settings(registerPath(), QSettings::NativeFormat);
-    settings.setValue(scDisplayName, m_data.value(QLatin1String("ProductName")));
+    settings.setValue(scDisplayName, displayName);
     settings.setValue(QLatin1String("DisplayVersion"), m_data.value(QLatin1String("ProductVersion")));
     const QString maintenanceTool = QDir::toNativeSeparators(maintenanceToolName());
     settings.setValue(QLatin1String("DisplayIcon"), maintenanceTool);
