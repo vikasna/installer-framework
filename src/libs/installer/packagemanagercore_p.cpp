@@ -1673,7 +1673,7 @@ void PackageManagerCorePrivate::writeMaintenanceTool(OperationList performedOper
             QInstaller::appendInt64(&file, BinaryContent::MagicCookie);
         }
         input.close();
-        if (m_core->isInstaller() || isUpdater() || isPackageManager())
+        if (m_core->isInstaller() || isPackageManager())
             registerMaintenanceTool();
 #ifdef Q_OS_MACOS
         if (newBinaryWritten) {
@@ -2822,10 +2822,7 @@ void PackageManagerCorePrivate::registerMaintenanceTool()
     foreach (QInstaller::Component *component, m_core->components(PackageManagerCore::ComponentType::All)) {
         if (component->isInstalled()) {
             const QString componentDisplayName = component->displayName();
-            // Skip if component name matches product name
-            if (componentDisplayName != productName) {
-                installedComponents.append(componentDisplayName);
-            }
+            installedComponents.append(componentDisplayName);
         }
     }
     
