@@ -209,8 +209,8 @@ ComponentSelectionPagePrivate::ComponentSelectionPagePrivate(ComponentSelectionP
     treeViewVLayout->setObjectName(QLatin1String("TreeviewLayout"));
     treeViewVLayout->addWidget(m_treeView, 3);
 
-    m_spaceWidget = new SpaceWidget(m_core);
-    treeViewVLayout->addWidget(m_spaceWidget);
+    // m_spaceWidget = new SpaceWidget(m_core); // Vikas, commented as it was not needed
+    // treeViewVLayout->addWidget(m_spaceWidget);
 
     QWidget *mainStackedWidget = new QWidget();
     m_mainGLayout = new QGridLayout(mainStackedWidget);
