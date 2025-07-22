@@ -81,6 +81,9 @@
 #include <qt_windows.h>
 #endif
 
+#include <iostream>
+using namespace std;
+
 #define QUOTE_(x) #x
 #define QUOTE(x) QUOTE_(x)
 
@@ -2120,12 +2123,21 @@ bool PackageManagerCorePrivate::runPackageUpdater()
                 component = m_core->componentByName(PackageManagerCore::checkableName(name));
             if (component)
                 componentsByName.insert(name, component);
+            
+            if (QInstaller::LoggingHandler::instance().isVerbose()) {
+                std:cout << "[runupdater] OPeration from component: " << name << std::endl;
+            }
 
             if (isUpdater()) {
                 // We found the component, the component is not scheduled for update, the dependency solver
                 // did not add the component as install dependency and there is no replacement, keep it.
                 if ((component && !component->updateRequested() && !componentsToInstall.contains(component)
                     && !m_componentsToReplaceUpdaterMode.contains(name))) {
+                        if (QInstaller::LoggingHandler::instance().isVerbose()) {
+                            std::cout << "[up1] Adding this operation to nonRevertedOps: Name: " << 
+                                operation->name() << " Cmd: " << 
+                                operation->operationCommand() << std::endl;
+                        }
                         nonRevertedOperations.append(operation);
                         continue;
                 }
@@ -2133,6 +2145,11 @@ bool PackageManagerCorePrivate::runPackageUpdater()
                 // There is a replacement, but the replacement is not scheduled for update, keep it as well.
                 if (m_componentsToReplaceUpdaterMode.contains(name)
                     && !m_installerCalculator->resolvedComponents().contains(m_componentsToReplaceUpdaterMode.value(name).first)) {
+                        if (QInstaller::LoggingHandler::instance().isVerbose()) {
+                            std::cout << "[up2] Adding this operation to nonRevertedOps: Name: " << 
+                                operation->name() << " Cmd: " << 
+                                operation->operationCommand() << std::endl;
+                        }
                         nonRevertedOperations.append(operation);
                         continue;
                 }
@@ -2142,6 +2159,11 @@ bool PackageManagerCorePrivate::runPackageUpdater()
                 if (component
                         && component->installAction() == ComponentModelHelper::KeepInstalled
                         && !componentsToInstall.contains(component)) {
+                    if (QInstaller::LoggingHandler::instance().isVerbose()) {
+                        std::cout << "[Pm1] Adding this operation to nonRevertedOps: Name: " << 
+                            operation->name() << " Cmd: " << 
+                            operation->operationCommand() << std::endl;
+                    }
                     nonRevertedOperations.append(operation);
                     continue;
                 }
@@ -2149,6 +2171,11 @@ bool PackageManagerCorePrivate::runPackageUpdater()
                 // There is a replacement, but the replacement is not scheduled for update, keep it as well.
                 if (m_componentsToReplaceAllMode.contains(name)
                     && !m_componentsToReplaceAllMode.value(name).first->isSelectedForInstallation()) {
+                        if (QInstaller::LoggingHandler::instance().isVerbose()) {
+                            std::cout << "[Pm2] Adding this operation to nonRevertedOps: Name: " << 
+                                operation->name() << " Cmd: " << 
+                                operation->operationCommand() << std::endl;
+                        }
                         nonRevertedOperations.append(operation);
                         continue;
                 }
@@ -2162,8 +2189,27 @@ bool PackageManagerCorePrivate::runPackageUpdater()
             //  during an update for the maintenance tool.
             if (operation->value(QLatin1String("uninstall-only")).toBool()
                 || operation->value(QLatin1String("component")).toString().isEmpty()) {
+                    if (QInstaller::LoggingHandler::instance().isVerbose()) {
+                        std::cout << "[uninstall-only] Adding this operation to nonRevertedOps: Name: " << 
+                            operation->name() << " Cmd: " << 
+                            operation->operationCommand() << std::endl;
+                    }
                     nonRevertedOperations.append(operation);
                     continue;
+            }
+
+            if (isUpdater()) {
+                // At this point, this component was scheduled for update
+                //   if installer key skip_undo_ops is set add this operation to nonRevertedOperations and continue 
+                if (operation && m_core->containsValue(QLatin1String("skip_undo_ops"))) {
+                    if (QInstaller::LoggingHandler::instance().isVerbose()) {
+                        std::cout << "[skip_undo_ops] Adding this operation to nonRevertedOps: Name: " << 
+                            operation->name() << " Cmd: " << 
+                            operation->operationCommand() << std::endl;
+                    }
+                    nonRevertedOperations.append(operation);
+                    continue;
+                }
             }
 
             // uninstallation should be in reverse order so prepend it here
@@ -2207,6 +2253,11 @@ bool PackageManagerCorePrivate::runPackageUpdater()
 
         commitSessionOperations(); //end session, move ops to "old"
         m_needToWriteMaintenanceTool = true;
+        /*// if updater and if skip_undo_ops is set, we do not write the maintenance tool
+        if (isUpdater() && m_core->containsValue(QLatin1String("skip_undo_ops"))) {
+            m_needToWriteMaintenanceTool = false;
+            qCDebug(QInstaller::lcInstallerInstallLog) << "Skipping maintenance tool writing for updater.";
+        }*/
 
         // fake a possible wrong value to show a full progress bar
         const int progress = ProgressCoordinator::instance()->progressInPercentage();

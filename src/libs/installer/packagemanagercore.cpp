@@ -84,6 +84,9 @@
 
 #include <QStandardPaths>
 
+#include <iostream>
+using namespace std;
+
 /*!
     \namespace QInstaller
     \inmodule QtInstallerFramework
@@ -4669,14 +4672,27 @@ bool PackageManagerCore::fetchUpdaterPackages(const PackagesList &remotes, const
                     }
                 }
 
+                if (QInstaller::LoggingHandler::instance().isVerbose()) {
+                    std::cout << "[1/4] Found update for package: " << name.toStdString()
+                              << ", valid: " << (isValidUpdate ? "true" : "false") << std::endl;
+                }
                 // break if the update is not valid and if it's not the maintenance tool (we might get an update
                 // for the maintenance tool even if it's not currently installed - possible offline installation)
                 if (!isValidUpdate && (update->data(scEssential, scFalse).toString().toLower() == scFalse))
                     continue;   // Update for not installed package found, skip it.
 
+                if (QInstaller::LoggingHandler::instance().isVerbose()) {
+                    std::cout << "[2/4] Found update for package: " << name.toStdString()
+                              << ", valid: " << (isValidUpdate ? "true" : "false") << std::endl;
+                }
                 const LocalPackage &localPackage = locals.value(name);
                 if (!d->packageNeedsUpdate(localPackage, update))
                     continue;
+                
+                if (QInstaller::LoggingHandler::instance().isVerbose()) {
+                    std::cout << "[3/4] Found update for package: " << name.toStdString()
+                              << ", valid: " << (isValidUpdate ? "true" : "false") << std::endl;
+                }
                 // It is quite possible that we may have already installed the update. Lets check the last
                 // update date of the package and the release date of the update. This way we can compare and
                 // figure out if the update has been installed or not.
@@ -4684,6 +4700,10 @@ bool PackageManagerCore::fetchUpdaterPackages(const PackagesList &remotes, const
                 if (localPackage.lastUpdateDate > updateDate)
                     continue;
 
+                if (QInstaller::LoggingHandler::instance().isVerbose()) {
+                    std::cout << "[4/4] Found update for package: " << name.toStdString()
+                              << ", valid: " << (isValidUpdate ? "true" : "false") << std::endl;
+                }
                 if (update->data(scEssential, scFalse).toString().toLower() == scTrue ||
                         update->data(scForcedUpdate, scFalse).toString().toLower() == scTrue) {
                     setFoundEssentialUpdate(true);
