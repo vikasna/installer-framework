@@ -329,10 +329,12 @@ PackageManagerGui::PackageManagerGui(PackageManagerCore *core, QWidget *parent)
     , d(new Private(this))
     , m_core(core)
 {
-    if (m_core->isInstaller())
+    if (m_core->isInstaller()) {
         setWindowTitle(tr("%1 Setup").arg(m_core->value(scTitle)));
-    else
+        setOption(NoCancelButton);
+    } else {
         setWindowTitle(tr("Maintain %1").arg(m_core->value(scTitle)));
+    }
     setWindowFlags(windowFlags() &~ Qt::WindowContextHelpButtonHint);
 
 #ifdef Q_OS_MACOS
@@ -525,7 +527,22 @@ void PackageManagerGui::updatePageListWidget()
             itemText.replace(regExp1, QLatin1String("\\1 \\2"));
             itemText.replace(regExp2, QLatin1String("\\1 \\2"));
         }
-        QListWidgetItem *item = new QListWidgetItem(itemText, m_pageListWidget);
+
+        QString icon;
+        if (id < d->m_currentId) {
+            // Completed pages
+            icon = QString::fromUtf8("☑ ");
+        } else if (id == d->m_currentId) {
+            // Current page
+            icon = QString::fromUtf8("⦿ ");
+        } else {
+            // Upcoming pages
+            icon = QString::fromUtf8("○ ");
+        }
+        QString newTitle = itemText;
+        newTitle.prepend(icon);
+
+        QListWidgetItem *item = new QListWidgetItem(newTitle, m_pageListWidget);
         item->setSizeHint(QSize(m_pageListWidget->width(), 30));
 
         // Give visual indication about current & non-visited pages
