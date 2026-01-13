@@ -13,6 +13,13 @@
   <property name="windowTitle">
    <string>Settings</string>
   </property>
+  <property name="autoFillBackground">
+   <bool>true</bool>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QDialog#SettingsDialog { background-color: white; background-image: none; border-image: none; }
+QDialog#SettingsDialog * { background-image: none; border-image: none; }</string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
     <widget class="QTabWidget" name="tabWidget">

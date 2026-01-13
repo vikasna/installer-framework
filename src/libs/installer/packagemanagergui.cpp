@@ -1108,8 +1108,8 @@ void PackageManagerGui::updateButtonLayout()
 
     buttons[1] = QWizard::Stretch;
     if (options() & QWizard::HaveCustomButton1) {
-        buttons[1] = QWizard::CustomButton1;
-        buttons[2] = QWizard::Stretch;
+        buttons[2] = QWizard::CustomButton1;
+        buttons[1] = QWizard::Stretch;
     }
 
     if (options() & QWizard::HaveCustomButton2)
@@ -1956,7 +1956,10 @@ void IntroductionPage::entering()
     showWidgets(false);
     setMessage(QString());
     setErrorMessage(QString());
-    setButtonText(QWizard::CancelButton, tr("&Quit"));
+    setButtonText(QWizard::CancelButton, tr("&Cancel"));
+    setButtonText(QWizard::NextButton, tr("&Next   >"));
+    setButtonText(QWizard::BackButton, tr("<   &Previous"));
+    setButtonText(QWizard::CommitButton, tr("&Install"));
 
     m_progressBar->setValue(0);
     m_progressBar->setRange(0, 0);
@@ -2108,6 +2111,10 @@ void LicenseAgreementPage::entering()
     m_licenseListWidget->clear();
     m_textBrowser->setHtml(QString());
     m_licenseListWidget->setVisible(false);
+    setButtonText(QWizard::CancelButton, tr("&Cancel"));
+    setButtonText(QWizard::NextButton, tr("&Next   >"));
+    setButtonText(QWizard::BackButton, tr("<   &Previous"));
+    setButtonText(QWizard::CommitButton, tr("&Install"));
 
     foreach (QInstaller::Component *component, packageManagerCore()->orderedComponentsToInstall())
         packageManagerCore()->addLicenseItem(component->licenses());
@@ -2222,6 +2229,10 @@ ComponentSelectionPage::~ComponentSelectionPage()
 */
 void ComponentSelectionPage::entering()
 {
+    setButtonText(QWizard::CancelButton, tr("&Cancel"));
+    setButtonText(QWizard::NextButton, tr("&Next   >"));
+    setButtonText(QWizard::BackButton, tr("<   &Previous"));
+    setButtonText(QWizard::CommitButton, tr("&Install"));
     static const char *strings[] = {
         QT_TR_NOOP("Please select the components you want to update."),
         QT_TR_NOOP("Please select the components you want to install."),
@@ -2533,6 +2544,10 @@ void TargetDirectoryPage::entering()
 {
     if (QPushButton *const b = qobject_cast<QPushButton *>(gui()->button(QWizard::NextButton)))
         b->setDefault(true);
+    setButtonText(QWizard::CancelButton, tr("&Cancel"));
+    setButtonText(QWizard::NextButton, tr("&Next   >"));
+    setButtonText(QWizard::BackButton, tr("<   &Previous"));
+    setButtonText(QWizard::CommitButton, tr("&Install"));
 }
 
 /*!
@@ -2687,6 +2702,10 @@ ReadyForInstallationPage::ReadyForInstallationPage(PackageManagerCore *core)
 */
 void ReadyForInstallationPage::entering()
 {
+    setButtonText(QWizard::CancelButton, tr("&Cancel"));
+    setButtonText(QWizard::NextButton, tr("&Next   >"));
+    setButtonText(QWizard::BackButton, tr("<   &Previous"));
+    setButtonText(QWizard::CommitButton, tr("&Install"));
     setComplete(d->entering());
 }
 
@@ -2801,7 +2820,10 @@ bool PerformInstallationPage::isAutoSwitching() const
 void PerformInstallationPage::entering()
 {
     setComplete(false);
-
+    setButtonText(QWizard::CancelButton, tr("&Cancel"));
+    setButtonText(QWizard::NextButton, tr("&Next   >"));
+    setButtonText(QWizard::BackButton, tr("<   &Previous"));
+    setButtonText(QWizard::CommitButton, tr("&Install"));
     m_performInstallationForm->enableDetails();
     emit setAutomatedPageSwitchEnabled(true);
 
@@ -2996,6 +3018,11 @@ FinishedPage::FinishedPage(PackageManagerCore *core)
 */
 void FinishedPage::entering()
 {
+    setButtonText(QWizard::FinishButton, tr("&Done"));
+    setButtonText(QWizard::CancelButton, tr("&Cancel"));
+    setButtonText(QWizard::NextButton, tr("&Next   >"));
+    setButtonText(QWizard::BackButton, tr("<   &Previous"));
+    setButtonText(QWizard::CommitButton, tr("&Install"));
     if (m_commitButton) {
         disconnect(m_commitButton, &QAbstractButton::clicked, this, &FinishedPage::handleFinishClicked);
         m_commitButton = nullptr;

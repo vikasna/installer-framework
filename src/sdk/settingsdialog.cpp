@@ -197,6 +197,14 @@ SettingsDialog::SettingsDialog(PackageManagerCore *core, QWidget *parent)
     , m_cacheCleared(false)
 {
     m_ui->setupUi(this);
+
+    // Load stylesheet from file
+    QFile styleFile(QStringLiteral(":/settings_dialog_stylesheet.qss"));
+    if (styleFile.open(QIODevice::ReadOnly)) {
+        setStyleSheet(QString::fromLatin1(styleFile.readAll()));
+        styleFile.close();
+    }
+
     setupRepositoriesTreeWidget();
 
     const Settings &settings = m_core->settings();
