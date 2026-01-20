@@ -113,8 +113,8 @@ public:
         setObjectName(QLatin1String("Dynamic") + widget->objectName());
         setPixmap(QWizard::WatermarkPixmap, QPixmap());
 
-        setColoredSubTitle(QLatin1String(" "));
-        setColoredTitle(widget->windowTitle());
+        //setColoredSubTitle(QLatin1String(" "));
+        //setColoredTitle(widget->windowTitle());
         m_widget->setProperty("complete", true);
         m_widget->setProperty("final", false);
         m_widget->setProperty("commit", false);
@@ -831,13 +831,13 @@ void PackageManagerGui::showEvent(QShowEvent *event)
     if (!event->spontaneous()) {
         foreach (int id, pageIds()) {
             const QString subTitle = page(id)->subTitle();
-            if (subTitle.isEmpty()) {
+            /*if (subTitle.isEmpty()) {
                 const QWizard::WizardStyle style = wizardStyle();
                 if ((style == QWizard::ClassicStyle) || (style == QWizard::ModernStyle)) {
                     // otherwise the colors might screw up
                     page(id)->setSubTitle(QLatin1String(" "));
                 }
-            }
+            }*/
         }
         QSize minimumSize;
         minimumSize.setWidth(m_core->settings().wizardMinimumWidth()
@@ -1368,7 +1368,8 @@ QString PackageManagerPage::productName() const
 */
 void PackageManagerPage::setColoredTitle(const QString &title)
 {
-    setTitle(QString::fromLatin1("<font color=\"%1\">%2</font>").arg(m_titleColor, title));
+    //setTitle(QString::fromLatin1("<font color=\"%1\">%2</font>").arg(m_titleColor, title));
+    return;
 }
 
 /*!
@@ -1376,7 +1377,8 @@ void PackageManagerPage::setColoredTitle(const QString &title)
 */
 void PackageManagerPage::setColoredSubTitle(const QString &subTitle)
 {
-    setSubTitle(QString::fromLatin1("<font color=\"%1\">%2</font>").arg(m_titleColor, subTitle));
+    //setSubTitle(QString::fromLatin1("<font color=\"%1\">%2</font>").arg(m_titleColor, subTitle));
+    return;
 }
 
 /*!
