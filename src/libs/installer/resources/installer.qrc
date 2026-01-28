@@ -4,6 +4,7 @@
         <file>installer.ico</file>
         <file>installer.icns</file>
         <file>install.png</file>
+		<file>browse_button.png</file>
         <file>uninstall.png</file>
         <file>keepinstalled.png</file>
         <file>keepuninstalled.png</file>

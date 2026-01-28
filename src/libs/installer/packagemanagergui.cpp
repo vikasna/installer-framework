@@ -324,6 +324,7 @@ public:
     Constructs a package manager UI with package manager specified by \a core
     and \a parent as parent.
 */
+#include <QDebug>
 PackageManagerGui::PackageManagerGui(PackageManagerCore *core, QWidget *parent)
     : QWizard(parent)
     , d(new Private(this))
@@ -2071,6 +2072,7 @@ private:
 /*!
     Constructs a license check page with \a core as parent.
 */
+#include <QToolButton>
 LicenseAgreementPage::LicenseAgreementPage(PackageManagerCore *core)
     : PackageManagerPage(core)
 {
@@ -2463,18 +2465,22 @@ TargetDirectoryPage::TargetDirectoryPage(PackageManagerCore *core)
     connect(&m_textChangeTimer, &QTimer::timeout, this, &QWizardPage::completeChanged);
 
     m_lineEdit = new QLineEdit(this);
+    m_lineEdit->setClearButtonEnabled(true);
+    QIcon browseIcon (QStringLiteral(":/browse_button.png"));
+    QAction* actionPtr = m_lineEdit->addAction(browseIcon, QLineEdit::TrailingPosition);
+    connect( actionPtr,SIGNAL( triggered(bool) ), this, SLOT( dirRequested() ) );
     m_lineEdit->setObjectName(QLatin1String("TargetDirectoryLineEdit"));
     connect(m_lineEdit, &QLineEdit::textChanged,
             &m_textChangeTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
     hlayout->addWidget(m_lineEdit);
 
-    QPushButton *browseButton = new QPushButton(this);
-    browseButton->setObjectName(QLatin1String("BrowseDirectoryButton"));
-    connect(browseButton, &QAbstractButton::clicked, this, &TargetDirectoryPage::dirRequested);
-    browseButton->setShortcut(QKeySequence(tr("Alt+R", "Browse file system to choose a file")));
-    browseButton->setText(tr("B&rowse..."));
-    browseButton->setToolTip(TargetDirectoryPage::tr("Browse file system to choose the installation directory."));
-    hlayout->addWidget(browseButton);
+    // QPushButton *browseButton = new QPushButton(this);
+    // browseButton->setObjectName(QLatin1String("BrowseDirectoryButton"));
+    // connect(browseButton, &QAbstractButton::clicked, this, &TargetDirectoryPage::dirRequested);
+    // browseButton->setShortcut(QKeySequence(tr("Alt+R", "Browse file system to choose a file")));
+    // browseButton->setText(tr("B&rowse..."));
+    // browseButton->setToolTip(TargetDirectoryPage::tr("Browse file system to choose the installation directory."));
+    // hlayout->addWidget(browseButton);
 
     layout->addLayout(hlayout);
 
@@ -2485,7 +2491,39 @@ TargetDirectoryPage::TargetDirectoryPage(PackageManagerCore *core)
     m_warningLabel->setPalette(palette);
     m_warningLabel->setWordWrap(true);
     m_warningLabel->setObjectName(QLatin1String("WarningLabel"));
+    m_warningLabel->setMinimumHeight(40);
+    m_warningLabel->setMaximumHeight(40);
     layout->addWidget(m_warningLabel);
+
+    QLabel *msgLabel2 = new QLabel(this);
+    msgLabel2->setWordWrap(true);
+    msgLabel2->setObjectName(QLatin1String("CommonMessageLabel"));
+    msgLabel2->setText(tr("Please specify the directory where %1 will be installed.").arg(productName()));
+    layout->addWidget(msgLabel2);
+
+    m_textChangeTimer2.setSingleShot(true);
+    m_textChangeTimer2.setInterval(200);
+    connect(&m_textChangeTimer2, &QTimer::timeout, this, &QWizardPage::completeChanged);
+
+    QHBoxLayout *hlayout2 = new QHBoxLayout;
+    m_lineEdit2 = new QLineEdit(this);
+    m_lineEdit2->setClearButtonEnabled(true);
+    QIcon browseIcon2 (QStringLiteral(":/browse_button.png"));
+    QAction* actionPtr2 = m_lineEdit2->addAction(browseIcon2, QLineEdit::TrailingPosition);
+    connect( actionPtr2,SIGNAL( triggered(bool) ), this, SLOT( dirRequestedCommon() ) );
+    m_lineEdit2->setObjectName(QLatin1String("TargetDirectoryCommonLineEdit"));
+    connect(m_lineEdit2, &QLineEdit::textChanged,
+            &m_textChangeTimer2, static_cast<void (QTimer::*)()>(&QTimer::start));
+    hlayout2->addWidget(m_lineEdit2);
+    layout->addLayout(hlayout2);
+
+    m_warningLabel2 = new QLabel(this);
+    m_warningLabel2->setPalette(palette);
+    m_warningLabel2->setWordWrap(true);
+    m_warningLabel2->setObjectName(QLatin1String("CommonWarningLabel"));
+    m_warningLabel2->setMinimumHeight(40);
+    m_warningLabel2->setMaximumHeight(40);
+    layout->addWidget(m_warningLabel2);
 
     if (packageManagerCore()->settings().wizardShowPageList())
         layout->setContentsMargins(QMargins(0, -1, -1, 0));
@@ -2500,6 +2538,11 @@ QString TargetDirectoryPage::targetDir() const
     return m_lineEdit->text().trimmed();
 }
 
+QString TargetDirectoryPage::targetCommonDir() const
+{
+    return m_lineEdit2->text().trimmed();
+}
+
 /*!
     Sets the directory specified by \a dirName as the target directory for the
     installation.
@@ -2507,6 +2550,11 @@ QString TargetDirectoryPage::targetDir() const
 void TargetDirectoryPage::setTargetDir(const QString &dirName)
 {
     m_lineEdit->setText(dirName);
+}
+
+void TargetDirectoryPage::setTargetCommonDir(const QString &dirName)
+{
+    m_lineEdit2->setText(dirName);
 }
 
 /*!
@@ -2527,6 +2575,20 @@ void TargetDirectoryPage::initializePage()
         }
     }
     m_lineEdit->setText(QDir::toNativeSeparators(QDir(targetDir).absolutePath()));
+
+    QString targetDir2 = packageManagerCore()->value(scCommonDir);
+    if (targetDir2.isEmpty()) {
+        targetDir2 = QDir::homePath() + QDir::separator();
+        if (!packageManagerCore()->settings().allowSpaceInPath()) {
+            // prevent spaces in the default target directory
+            if (targetDir2.contains(QLatin1Char(' ')))
+                targetDir2 = QDir::rootPath();
+            targetDir2 += productName().remove(QLatin1Char(' '));
+        } else {
+            targetDir2 += productName();
+        }
+    }
+    m_lineEdit2->setText(QDir::toNativeSeparators(QDir(targetDir2).absolutePath()));
 
     PackageManagerPage::initializePage();
 }
@@ -2568,6 +2630,7 @@ void TargetDirectoryPage::entering()
 void TargetDirectoryPage::leaving()
 {
     packageManagerCore()->setValue(scTargetDir, targetDir());
+    packageManagerCore()->setValue(scCommonDir, targetCommonDir());
 }
 
 void TargetDirectoryPage::dirRequested()
@@ -2577,6 +2640,15 @@ void TargetDirectoryPage::dirRequested()
     if (newDirName.isEmpty() || newDirName == targetDir())
         return;
     m_lineEdit->setText(QDir::toNativeSeparators(newDirName));
+}
+
+void TargetDirectoryPage::dirRequestedCommon()
+{
+    const QString newDirName = QFileDialog::getExistingDirectory(this,
+        tr("Select Common Installation Folder"), targetDir());
+    if (newDirName.isEmpty() || newDirName == targetDir())
+        return;
+    m_lineEdit2->setText(QDir::toNativeSeparators(newDirName));
 }
 
 /*!

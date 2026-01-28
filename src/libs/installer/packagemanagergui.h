@@ -364,7 +364,10 @@ class INSTALLER_EXPORT TargetDirectoryPage : public PackageManagerPage
 public:
     explicit TargetDirectoryPage(PackageManagerCore *core);
     QString targetDir() const;
+    QString targetCommonDir() const;
     void setTargetDir(const QString &dirName);
+    void setTargetCommonDir(const QString &dirName);
+
 
     void initializePage() override;
     bool validatePage() override;
@@ -376,14 +379,15 @@ protected:
 
 private Q_SLOTS:
     void dirRequested();
+    void dirRequestedCommon();
 
 private:
     QString targetDirWarning() const;
 
 private:
-    QLineEdit *m_lineEdit;
-    QLabel *m_warningLabel;
-    QTimer m_textChangeTimer;
+    QLineEdit *m_lineEdit, *m_lineEdit2;
+    QLabel *m_warningLabel, *m_warningLabel2;
+    QTimer m_textChangeTimer,m_textChangeTimer2;
 };
 
 

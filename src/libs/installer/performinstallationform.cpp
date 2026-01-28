@@ -145,7 +145,7 @@ void PerformInstallationForm::setupUi(QWidget *widget)
     m_detailsButton->setObjectName(QLatin1String("DetailsButton"));
     m_detailsButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
     connect(m_detailsButton, &QAbstractButton::clicked, this, &PerformInstallationForm::toggleDetails);
-    topLayout->addWidget(m_detailsButton);
+    //topLayout->addWidget(m_detailsButton);
 
     QVBoxLayout *bottomLayout = new QVBoxLayout();
     bottomLayout->setObjectName(QLatin1String("BottomLayout"));
@@ -168,6 +168,8 @@ void PerformInstallationForm::setupUi(QWidget *widget)
     m_detailsBrowser->setWordWrapMode(QTextOption::NoWrap);
     m_detailsBrowser->setObjectName(QLatin1String("DetailsBrowser"));
     m_detailsBrowser->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    m_detailsBrowser->setMinimumHeight(60);
+    m_detailsBrowser->setMaximumHeight(60);
     bottomLayout->addWidget(m_detailsBrowser);
 
     bottomLayout->setStretch(1, 10);
@@ -235,8 +237,8 @@ void PerformInstallationForm::toggleDetails()
 {
     const bool willShow = !isShowingDetails();
     m_detailsButton->setText(willShow ? tr("&Hide Details") : tr("&Show Details"));
-    m_detailsBrowser->setVisible(willShow);
-    m_productImagesScrollArea->setVisible(!willShow);
+    //m_detailsBrowser->setVisible(willShow);
+    //m_productImagesScrollArea->setVisible(!willShow);
     emit showDetailsChanged();
 }
 
@@ -254,9 +256,10 @@ void PerformInstallationForm::clearDetailsBrowser()
 */
 void PerformInstallationForm::enableDetails()
 {
-    m_detailsButton->setEnabled(true);
-    m_detailsButton->setText(tr("&Show Details"));
-    m_detailsBrowser->setVisible(false);
+    //m_detailsButton->setEnabled(true);
+    //m_detailsButton->setText(tr("&Show Details"));
+    m_detailsButton->setVisible(false);
+    m_detailsBrowser->setVisible(true);
     m_productImagesScrollArea->setVisible(true);
 }
 
