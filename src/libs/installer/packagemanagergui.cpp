@@ -1552,6 +1552,7 @@ IntroductionPage::IntroductionPage(PackageManagerCore *core)
     , m_packageManager(nullptr)
     , m_updateComponents(nullptr)
     , m_removeAllComponents(nullptr)
+    , m_settingsButton(nullptr)
 {
     setObjectName(QLatin1String("IntroductionPage"));
 
@@ -1617,6 +1618,21 @@ IntroductionPage::IntroductionPage(PackageManagerCore *core)
     layout->addWidget(m_msgLabel);
     layout->addWidget(widget);
     layout->addItem(new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding));
+
+    // Add settings button at the bottom left corner
+    QHBoxLayout *bottomLayout = new QHBoxLayout();
+    m_settingsButton = new QPushButton(tr("⚙ &Settings"), this);
+    m_settingsButton->setObjectName(QLatin1String("SettingsButton"));
+    m_settingsButton->setToolTip(tr("Specify proxy settings and configure repositories for add-on components."));
+    m_settingsButton->setVisible(!core->isOfflineOnly());
+    connect(m_settingsButton, &QPushButton::clicked, [this]() {
+        if (PackageManagerGui *pmGui = qobject_cast<PackageManagerGui*>(wizard())) {
+            emit pmGui->settingsButtonClicked();
+        }
+    });
+    bottomLayout->addWidget(m_settingsButton);
+    bottomLayout->addItem(new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum));
+    layout->addLayout(bottomLayout);
 
     connect(core, &PackageManagerCore::metaJobProgress, this, &IntroductionPage::onProgressChanged);
     connect(core, &PackageManagerCore::metaJobTotalProgress, this, &IntroductionPage::setTotalProgress);
@@ -1891,7 +1907,7 @@ void IntroductionPage::setUpdater(bool value)
 {
     if (value) {
         entering();
-        gui()->requestSettingsButtonByInstaller(true);
+        //gui()->requestSettingsButtonByInstaller(true);
         packageManagerCore()->setUpdater();
         emit packageManagerCoreTypeChanged();
 
@@ -1903,7 +1919,7 @@ void IntroductionPage::setUninstaller(bool value)
 {
     if (value) {
         entering();
-        gui()->requestSettingsButtonByInstaller(true);
+        //gui()->requestSettingsButtonByInstaller(true);
         packageManagerCore()->setUninstaller();
         emit packageManagerCoreTypeChanged();
 
@@ -1915,7 +1931,7 @@ void IntroductionPage::setPackageManager(bool value)
 {
     if (value) {
         entering();
-        gui()->requestSettingsButtonByInstaller(true);
+        //gui()->requestSettingsButtonByInstaller(true);
         packageManagerCore()->setPackageManager();
         emit packageManagerCoreTypeChanged();
 
@@ -1996,6 +2012,9 @@ void IntroductionPage::entering()
         m_packageManager->setEnabled(false);
 
     setSettingsButtonRequested((!core->isOfflineOnly()));
+
+    // Show/hide the settings button on this page based on whether it's offline only
+    m_settingsButton->setVisible(!core->isOfflineOnly());
 }
 
 /*!

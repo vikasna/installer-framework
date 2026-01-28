@@ -47,6 +47,7 @@ class QLineEdit;
 class QListWidget;
 class QListWidgetItem;
 class QProgressBar;
+class QPushButton;
 class QRadioButton;
 class QTextBrowser;
 class QWinTaskbarButton;
@@ -279,6 +280,7 @@ private:
     QRadioButton *m_packageManager;
     QRadioButton *m_updateComponents;
     QRadioButton *m_removeAllComponents;
+    QPushButton *m_settingsButton;
 
 #ifdef Q_OS_WIN
     QWinTaskbarButton *m_taskButton;
