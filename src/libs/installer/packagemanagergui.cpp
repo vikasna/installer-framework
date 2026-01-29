@@ -1369,7 +1369,7 @@ QString PackageManagerPage::productName() const
 */
 void PackageManagerPage::setColoredTitle(const QString &title)
 {
-    setTitle(QString::fromLatin1("<font color=\"%1\">%2</font>").arg(m_titleColor, title));
+    //setTitle(QString::fromLatin1("<font color=\"%1\">%2</font>").arg(m_titleColor, title));
 }
 
 /*!
@@ -2678,13 +2678,23 @@ void TargetDirectoryPage::dirRequestedCommon()
 */
 bool TargetDirectoryPage::isComplete() const
 {
-    const QString warning = packageManagerCore()->targetDirWarning(targetDir());
+    QString warning = packageManagerCore()->targetDirWarning(targetDir());
+    if (warning.isEmpty()) {
+        warning = m_warningLabel->text();
+    }
+
+    QString warning2 = packageManagerCore()->targetDirWarning(targetCommonDir());
+    if (warning2.isEmpty()) {
+        warning2 = m_warningLabel2->text();
+    }
+
     if (warning.isEmpty()) {
         // Inform possible mount change
         emit packageManagerCore()->installDirectoryChanged(targetDir());
     }
-    m_warningLabel->setText(warning);
-    return warning.isEmpty();
+    //m_warningLabel->setText(warning);
+    //m_warningLabel2->setText(warning2);
+    return warning.isEmpty() && warning2.isEmpty();
 }
 
 // -- StartMenuDirectoryPage
