@@ -106,14 +106,21 @@ QList<VolumeInfo> mountedVolumes()
         v.setVolumeDescriptor(parts.at(0));
         v.setFileSystemType(parts.value(2));
 
-        struct statvfs data;
-        if (statvfs(qPrintable(v.mountPath() + QLatin1String("/.")), &data) == 0) {
-            v.setSize(quint64(static_cast<quint64>(data.f_blocks) * data.f_bsize));
-            v.setAvailableSize(quint64(static_cast<quint64>(data.f_bavail) * data.f_bsize));
-        }
         result.append(v);
     }
     return result;
+}
+
+/*!
+    Populates size and available size for \a info by calling statvfs on its mount path.
+*/
+void populateVolumeSize(VolumeInfo &info)
+{
+    struct statvfs data;
+    if (statvfs(qPrintable(info.mountPath() + QLatin1String("/.")), &data) == 0) {
+        info.setSize(quint64(static_cast<quint64>(data.f_blocks) * data.f_bsize));
+        info.setAvailableSize(quint64(static_cast<quint64>(data.f_bavail) * data.f_bsize));
+    }
 }
 
 /*!

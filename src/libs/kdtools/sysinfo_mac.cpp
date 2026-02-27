@@ -75,6 +75,11 @@ QList<VolumeInfo> mountedVolumes()
     return result;
 }
 
+void populateVolumeSize(VolumeInfo &info)
+{
+    Q_UNUSED(info)
+}
+
 QList<ProcessInfo> runningProcesses()
 {
     int mib[4] = {

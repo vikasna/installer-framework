@@ -75,6 +75,7 @@ struct ProcessInfo
 
 quint64 installedMemory();
 QList<VolumeInfo> mountedVolumes();
+void populateVolumeSize(VolumeInfo &info);
 QList<ProcessInfo> runningProcesses();
 bool killProcess(const ProcessInfo &process, int msecs = 30000);
 bool  pathIsOnLocalDevice(const QString &path);

@@ -148,6 +148,11 @@ QList<VolumeInfo> mountedVolumes()
     return volumes;
 }
 
+void populateVolumeSize(VolumeInfo &info)
+{
+    Q_UNUSED(info)
+}
+
 bool pathIsOnLocalDevice(const QString &path)
 {
     if (!QFileInfo::exists(path))
