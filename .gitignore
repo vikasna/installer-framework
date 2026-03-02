@@ -90,6 +90,7 @@ doc-build
 .pch
 .metadata
 *.qtc_clangd
+.claude
 
 doc/codeattributions.qdoc
 /doc/qdoc_wrapper.sh

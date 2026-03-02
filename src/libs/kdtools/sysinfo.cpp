@@ -54,23 +54,12 @@ VolumeInfo VolumeInfo::fromPath(const QString &path)
 
     // sort by length to get the longest mount point (not just "/") first
     std::sort(volumes.begin(), volumes.end(), PathLongerThan());
-    foreach (const VolumeInfo &volume, volumes) {
-        const QDir volumePath(volume.mountPath());
-        if (targetPath == volumePath)
-            return volume;
-#ifdef Q_OS_WIN
-        if (QDir::toNativeSeparators(path).toLower().startsWith(volume.mountPath().toLower()))
-#else
-        // we need to take some care here, as canonical path might return an empty string if the target
-        // does not exist yet
-        if (targetPath.exists()) {
-            // the target exist, we can solve the path and if it fits return
-            if (targetPath.canonicalPath().startsWith(volume.mountPath()))
-                return volume;
-            continue;
-        }
 
-        // the target directory does not exist yet, we need to cd up till we find the first existing dir
+#ifndef Q_OS_WIN
+    // If the target does not exist yet, walk up to the first existing parent once,
+    // before entering the loop. This avoids repeated stat() and realpath() calls
+    // (one per mount entry) for the same path.
+    if (!targetPath.exists()) {
         QStringList parts = targetPath.absolutePath().split(QDir::separator(), Qt::SkipEmptyParts);
         while (targetPath.absolutePath() != QDir::rootPath()) {
             if (targetPath.exists())
@@ -81,10 +70,28 @@ VolumeInfo VolumeInfo::fromPath(const QString &path)
             else
                 targetPath = QDir(QLatin1Char('/') + parts.join(QDir::separator()));
         }
-
-        if (targetPath.canonicalPath().startsWith(volume.mountPath()))
+    }
+    // Resolve once — canonicalPath() calls realpath() which may be slow.
+    const QString canonicalTarget = targetPath.canonicalPath();
 #endif
-            return volume;
+
+    foreach (const VolumeInfo &volume, volumes) {
+#ifdef Q_OS_WIN
+        if (QDir::toNativeSeparators(path).toLower().startsWith(volume.mountPath().toLower()))
+#else
+        // Use pure string comparisons instead of QDir::operator==, which internally
+        // calls canonicalPath() (realpath()) on each volume's mount path — potentially
+        // blocking for every NFS/network mount point in the list.
+        const QString mountPath = QDir::cleanPath(volume.mountPath());
+        if (mountPath == QLatin1String("/") ||
+            canonicalTarget == mountPath ||
+            canonicalTarget.startsWith(mountPath + QLatin1Char('/')))
+#endif
+        {
+            VolumeInfo result = volume;
+            populateVolumeSize(result);
+            return result;
+        }
     }
     return VolumeInfo();
 }
