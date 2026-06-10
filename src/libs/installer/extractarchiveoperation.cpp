@@ -257,8 +257,8 @@ bool ExtractArchiveOperation::undoOperation()
     }
     if (!files.isEmpty())
         startUndoProcess(files);
-    if (!useStringListType)
-        deleteDataFile(m_relocatedDataFileName);
+    /*Vikas if (!useStringListType)
+        deleteDataFile(m_relocatedDataFileName);*/
 
     // Remove the installerResources directory if it is empty.
     QDir(targetDir).rmdir(QLatin1String("installerResources"));
@@ -386,7 +386,7 @@ bool ExtractArchiveOperation::readDataFileContents(QString &targetDir, QStringLi
         targetDir = QDir::cleanPath(targetDir + QLatin1String("/.."));
     m_relocatedDataFileName = replacePath(filePath, QLatin1String(scRelocatable), targetDir);
     QFile file(m_relocatedDataFileName);
-
+	
     if (file.open(QIODevice::ReadOnly)) {
         QDataStream in(&file);
         in >> *resultList;
