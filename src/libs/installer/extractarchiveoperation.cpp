@@ -257,8 +257,8 @@ bool ExtractArchiveOperation::undoOperation()
     }
     if (!files.isEmpty())
         startUndoProcess(files);
-    if (!useStringListType)
-        deleteDataFile(m_relocatedDataFileName);
+    /*Vikas if (!useStringListType)
+        deleteDataFile(m_relocatedDataFileName);*/
 
     // Remove the installerResources directory if it is empty.
     QDir(targetDir).rmdir(QLatin1String("installerResources"));
