@@ -167,11 +167,13 @@ bool ExtractArchiveOperation::performOperation()
     // the dat file very slow to read and write. The .dat file is read into memory in startup,
     // writing the file names to a separate file we don't need to load all the file names into
     // memory as we need those only in uninstall. This will save a lot of memory.
-    // Parse a file and directorory structure using archivepath syntax
-    // installer://<component_name>/<filename>.7z Resulting structure is:
+    // Resulting installerResources structure is:
     // -installerResources (dir)
     //   -<component_name> (dir)
-    //    -<filename>.txt (file)
+    //    -<version><archivebasename>.txt (file)
+    // For installer:// URLs the component name and archive filename are parsed from the URL.
+    // For plain file paths (e.g. hybrid installer with manually created Extract operations),
+    // the component name is taken from the operation's "component" metadata value.
 
     QStringList files = callback.extractedFiles();
     addParentFolders(targetDir, files);
@@ -188,9 +190,32 @@ bool ExtractArchiveOperation::performOperation()
     }
     const QString resourcesPath = installDir + QLatin1Char('/') + QLatin1String("installerResources");
 
-    QString fileDirectory = resourcesPath + QLatin1Char('/') + archivePath.section(QLatin1Char('/'), 1, 1,
-                            QString::SectionSkipEmpty) + QLatin1Char('/');
-    QString archiveFileName = archivePath.section(QLatin1Char('/'), 2, 2, QString::SectionSkipEmpty);
+    // The installerResources directory structure is:
+    //   installerResources/<component_name>/<version><archivebasename>.txt
+    //
+    // For installer:// URLs (online/offline installer normal path) the component name and
+    // archive filename are parsed directly from the URL fields:
+    //   installer://<component_name>/<version><archivebasename>.7z
+    //
+    // For plain file paths (e.g. hybrid installer with manually added Extract operations),
+    // the installer:// URL scheme is absent, so section()-based parsing produces wrong results.
+    // In that case, derive the component name from the operation's "component" metadata value
+    // (set on every operation by Component::addOperation) and derive the archive base name
+    // from the actual filename on disk, which already carries the version prefix.
+    QString componentName;
+    QString archiveFileName;
+    static const QString installerScheme = QLatin1String("installer://");
+    if (archivePath.startsWith(installerScheme, Qt::CaseInsensitive)) {
+        // Normal installer:// path: field[1]=componentName, field[2]=archiveFilename
+        componentName = archivePath.section(QLatin1Char('/'), 1, 1, QString::SectionSkipEmpty);
+        archiveFileName = archivePath.section(QLatin1Char('/'), 2, 2, QString::SectionSkipEmpty);
+    } else {
+        // Plain file path: derive component name from operation metadata, filename from path.
+        componentName = value(QLatin1String("component")).toString();
+        archiveFileName = QFileInfo(archivePath).fileName();
+    }
+
+    QString fileDirectory = resourcesPath + QLatin1Char('/') + componentName + QLatin1Char('/');
     QFileInfo fileInfo2(archiveFileName);
     QString suffix = fileInfo2.suffix();
     archiveFileName.chop(suffix.length() + 1); // removes suffix (e.g. '.7z') from archive filename
@@ -257,8 +282,8 @@ bool ExtractArchiveOperation::undoOperation()
     }
     if (!files.isEmpty())
         startUndoProcess(files);
-    /*Vikas if (!useStringListType)
-        deleteDataFile(m_relocatedDataFileName);*/
+    if (!useStringListType)
+        deleteDataFile(m_relocatedDataFileName);
 
     // Remove the installerResources directory if it is empty.
     QDir(targetDir).rmdir(QLatin1String("installerResources"));
@@ -386,7 +411,7 @@ bool ExtractArchiveOperation::readDataFileContents(QString &targetDir, QStringLi
         targetDir = QDir::cleanPath(targetDir + QLatin1String("/.."));
     m_relocatedDataFileName = replacePath(filePath, QLatin1String(scRelocatable), targetDir);
     QFile file(m_relocatedDataFileName);
-	
+
     if (file.open(QIODevice::ReadOnly)) {
         QDataStream in(&file);
         in >> *resultList;
