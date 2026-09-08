@@ -335,6 +335,7 @@ PackageManagerGui::PackageManagerGui(PackageManagerCore *core, QWidget *parent)
         setOption(NoCancelButton);
     } else {
         setWindowTitle(tr("Maintain %1").arg(m_core->value(scTitle)));
+		setOption(NoCancelButton);
     }
     setWindowFlags(windowFlags() &~ Qt::WindowContextHelpButtonHint);
 
