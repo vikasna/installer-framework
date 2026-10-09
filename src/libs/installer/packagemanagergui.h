@@ -137,6 +137,13 @@ private Q_SLOTS:
 protected:
     bool event(QEvent *event) override;
     void showEvent(QShowEvent *event) override;
+#ifdef Q_OS_WIN
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
+#else
+    bool nativeEvent(const QByteArray &eventType, void *message, qintptr *result) override;
+#endif
+#endif
     PackageManagerCore *packageManagerCore() const { return m_core; }
     void executeControlScript(int pageId);
 
