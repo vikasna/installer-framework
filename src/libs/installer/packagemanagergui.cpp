@@ -825,6 +825,24 @@ bool PackageManagerGui::event(QEvent *event)
     return QWizard::event(event);
 }
 
+#ifdef Q_OS_WIN
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+bool PackageManagerGui::nativeEvent(const QByteArray &eventType, void *message, long *result)
+#else
+bool PackageManagerGui::nativeEvent(const QByteArray &eventType, void *message, qintptr *result)
+#endif
+{
+    MSG *nativeMessage = static_cast<MSG *>(message);
+    if (nativeMessage && nativeMessage->message == WM_INITMENUPOPUP) {
+        const HWND window = reinterpret_cast<HWND>(winId());
+        const HMENU systemMenu = GetSystemMenu(window, FALSE);
+        if (systemMenu && reinterpret_cast<HMENU>(nativeMessage->wParam) == systemMenu)
+            EnableMenuItem(systemMenu, SC_SIZE, MF_BYCOMMAND | MF_GRAYED);
+    }
+    return QWizard::nativeEvent(eventType, message, result);
+}
+#endif
+
 /*!
     \reimp
 */
