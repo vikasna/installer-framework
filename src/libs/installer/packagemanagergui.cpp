@@ -1643,7 +1643,8 @@ IntroductionPage::IntroductionPage(PackageManagerCore *core)
     m_settingsButton = new QPushButton(tr("⚙ &Settings"), this);
     m_settingsButton->setObjectName(QLatin1String("SettingsButton"));
     m_settingsButton->setToolTip(tr("Specify proxy settings and configure repositories for add-on components."));
-    m_settingsButton->setVisible(!core->isOfflineOnly());
+    // m_settingsButton->setVisible(!core->isOfflineOnly());
+    m_settingsButton->setVisible(true);
     connect(m_settingsButton, &QPushButton::clicked, [this]() {
         if (PackageManagerGui *pmGui = qobject_cast<PackageManagerGui*>(wizard())) {
             emit pmGui->settingsButtonClicked();
@@ -2030,10 +2031,15 @@ void IntroductionPage::entering()
     if (m_forceUpdate)
         m_packageManager->setEnabled(false);
 
-    setSettingsButtonRequested((!core->isOfflineOnly()));
+    // setSettingsButtonRequested((!core->isOfflineOnly()));
 
     // Show/hide the settings button on this page based on whether it's offline only
-    m_settingsButton->setVisible(!core->isOfflineOnly());
+    // m_settingsButton->setVisible(!core->isOfflineOnly());
+    
+    setSettingsButtonRequested(true);
+    m_settingsButton->setVisible(true); 
+
+    
 }
 
 /*!
