@@ -1041,7 +1041,7 @@ QWidget *PackageManagerGui::pageWidgetByObjectName(const QString &name) const
 void PackageManagerGui::cancelButtonClicked()
 {
     const int id = currentId();
-    if (id == PackageManagerCore::Introduction || id == PackageManagerCore::InstallationFinished) {
+    if (id == PackageManagerCore::InstallationFinished) {
         m_core->setNeedsHardRestart(false);
         QDialog::reject(); return;
     }
